@@ -2,7 +2,7 @@ const ApiError = require('../error/apiError');
 const {Person} = require('../models/models.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const {validationResult} = require('express-validator');
 
 const generateToken = (id, name,email, ) => {
     console.log('id user ', id);
@@ -12,8 +12,12 @@ class UserController {
     async registration(req, res, next){
        try {
         const {name, password, email} = req.body;
-        if(!email | !name | !password){
-            return next(ApiError.badRequest('Заполните все поля'));
+
+        const errors = validationResult(req);
+        console.log('error registr ', errors);
+        if(!errors.isEmpty()){
+            
+            return res.status(400).json(errors.array());
         }
         const candidat = await Person.findOne(
             {
