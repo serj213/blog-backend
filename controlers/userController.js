@@ -60,10 +60,10 @@ class UserController {
 
     }
     async auth(req, res, next){
-        console.log('reqAuth ', req.user);
         const {id, name, email} = req.user
+        const userObj = {id, name, email}
         const token = generateToken(id, name, email )
-        return  res.json({token})
+        return  res.json({user:userObj, token})
     }
 }
 
