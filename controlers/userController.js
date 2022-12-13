@@ -16,7 +16,6 @@ class UserController {
         const errors = validationResult(req);
         console.log('error registr ', errors);
         if(!errors.isEmpty()){
-            
             return res.status(400).json(errors.array());
         }
         const candidat = await Person.findOne(
@@ -53,9 +52,8 @@ class UserController {
             }
 
             const token = generateToken(user.id, user.name, user.email)
-            res.json({token})
+            res.json({user, token})
            
-            
         } catch (error) {
             console.log('Ошибка при логировании ', error);
         }
