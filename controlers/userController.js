@@ -73,10 +73,9 @@ class UserController {
   }
   async auth(req, res, next) {
     const { id, name, email, avatar, aboutMe } = req.user;
-    const postsUser = await Person.findAll({ where: { userId: user.id } });
-
+    const postsUser = await Post.findAll({ where: { userId:id } });
     const userObj = { id, name, email, avatar, aboutMe, postsUser: postsUser };
-    const token = generateToken(userObj);
+    const token = generateToken(userObj);  
     return res.json({ user: userObj, token });
   }
 }

@@ -1,7 +1,14 @@
 const ApiError = require('../error/apiError');
 const { Person } = require('../models/models');
+const { Post } = require('../models/models.js');
 const { validationResult } = require('express-validator');
 const { badRequest } = require('../error/apiError');
+const jwt = require('jsonwebtoken');
+
+const generateToken = (tokenData) => {
+  const { id, name, email, avatar, aboutMe, postsUser } = tokenData;
+  return jwt.sign({ id, name, email, avatar, aboutMe, postsUser }, process.env.SECKRET_KEY, { expiresIn: '24h' });
+};
 
 class ProfileController {
   async editProfile(req, res, next) {
@@ -33,12 +40,25 @@ class ProfileController {
         return next(ApiError.internal('Не удалось обновить пользователя'));
       }
 
+      const postsUser = await Post.findAll({
+        where: {
+          userId: updatePerson.id,
+        },
+      });
+
       const editedData = {
+        id: updatePerson.id,
         name: updatePerson.name,
+        email: updatePerson.email,
         aboutMe: updatePerson.aboutMe,
+        postsUser: postsUser,
       };
+      const token = generateToken(editedData);
+
+
       return res.status(200).send({
-        data: editedData,
+        user: editedData,
+        token
       });
     } catch (error) {
       console.log('Ошибка при редактировании профиля');
@@ -54,7 +74,7 @@ class ProfileController {
         return next(ApiError.badRequest('Укажите id пользователя'));
       }
 
-      if (id !== req.user.id) {
+      if (+id !== +req.user.id) {
         return next(ApiError.internal('Вы можете удалить только своего пользователя'));
       }
 
